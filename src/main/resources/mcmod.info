@@ -1,0 +1,16 @@
+[
+{
+  "modid": "qsilkspawners",
+  "name": "Q Silk Spawners",
+  "description": "Break spawners with Silk Touch",
+  "version": "${version}",
+  "mcversion": "${mcversion}",
+  "url": "",
+  "updateUrl": "",
+  "authorList": ["quaternary"],
+  "credits": "shoutouts to EvilNotchLib for being garbage",
+  "logoFile": "",
+  "screenshots": [],
+  "dependencies": []
+}
+]
