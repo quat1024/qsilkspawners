@@ -16,6 +16,7 @@ import net.minecraft.world.World;
 import net.minecraftforge.event.world.BlockEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.event.FMLPostInitializationEvent;
+import net.minecraftforge.fml.common.eventhandler.EventPriority;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 
 @Mod(modid = QSilkSpawners.MODID, name = QSilkSpawners.NAME, version = QSilkSpawners.VERSION)
@@ -35,7 +36,7 @@ public class QSilkSpawners {
 		mobSpawnerItem = Item.getItemFromBlock(Blocks.MOB_SPAWNER);
 	}
 	
-	@SubscribeEvent
+	@SubscribeEvent(priority = EventPriority.HIGH)
 	public static void onBreak(BlockEvent.BreakEvent e) {
 		IBlockState state = e.getState();
 		if(state == null || !(state.getBlock() instanceof BlockMobSpawner)) return;
@@ -62,6 +63,15 @@ public class QSilkSpawners {
 			drop.setTagCompound(stackTag);
 			
 			Block.spawnAsEntity(world, e.getPos(), drop);
+			
+			//Kill the block and event early
+			//This (along with the high event priority) fixes things like
+			//enderio broken spawners being dropped even when you silk touch it
+			//This seems kinda hacky and I'm looking for a cleaner solution
+			//TODO: does this cause problems w/ block protection?
+			world.destroyBlock(e.getPos(), false);
+			world.removeTileEntity(e.getPos()); //Just in case? EnderIO does some fun stuff here haha
+			e.setCanceled(true);
 		}
 	}
 	
