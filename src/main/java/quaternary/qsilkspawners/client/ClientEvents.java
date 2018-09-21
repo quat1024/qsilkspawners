@@ -26,7 +26,6 @@ public class ClientEvents {
 		DummyMobSpawnerBaseLogic.SHARED_INST.readFromNBT(spawnerDataNBT);
 		Entity ent = DummyMobSpawnerBaseLogic.SHARED_INST.getCachedEntity();
 		
-		//TODO localization! :D
 		e.getToolTip().add(I18n.translateToLocalFormatted("qsilkspawners.tooltip.entity", ent.getName()));
 	}
 }
