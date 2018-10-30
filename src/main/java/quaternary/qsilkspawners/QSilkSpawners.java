@@ -83,6 +83,11 @@ public class QSilkSpawners {
 		EntityPlayer player = e.getPlayer();
 		if(player == null) return;
 		
+		//Fix a dorp when placing lily pads which ??? apparently don't set the active hand ???
+		//see https://github.com/quat1024/qsilkspawners/issues/2
+		//noinspection ConstantConditions
+		if(player.getActiveHand() == null) return;
+		
 		ItemStack stack = player.getHeldItem(player.getActiveHand());
 		if(stack.getItem() != mobSpawnerItem) return;
 		if(!stack.hasTagCompound()) return;
