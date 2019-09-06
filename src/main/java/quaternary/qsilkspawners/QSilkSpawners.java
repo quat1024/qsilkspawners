@@ -4,18 +4,26 @@ import net.minecraft.block.Block;
 import net.minecraft.block.BlockMobSpawner;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.enchantment.EnchantmentHelper;
+import net.minecraft.entity.Entity;
+import net.minecraft.entity.EntityList;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Blocks;
 import net.minecraft.init.Enchantments;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.nbt.NBTTagList;
+import net.minecraft.nbt.NBTTagString;
+import net.minecraft.tileentity.MobSpawnerBaseLogic;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.tileentity.TileEntityMobSpawner;
+import net.minecraft.util.WeightedSpawnerEntity;
 import net.minecraft.world.World;
+import net.minecraft.world.chunk.storage.AnvilChunkLoader;
 import net.minecraftforge.event.world.BlockEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.event.FMLPostInitializationEvent;
+import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
 import net.minecraftforge.fml.common.eventhandler.EventPriority;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 
@@ -29,6 +37,11 @@ public class QSilkSpawners {
 	public static final String TAG_SPAWNER_DATA = "SilkSpawnerData";
 	
 	public static Item mobSpawnerItem = null;
+	
+	@Mod.EventHandler
+	public static void preinit(FMLPreInitializationEvent e) {
+		ModConfig.preinit(e);
+	}
 	
 	@Mod.EventHandler
 	public static void postinit(FMLPostInitializationEvent e) {
@@ -55,11 +68,26 @@ public class QSilkSpawners {
 			
 			ItemStack drop = new ItemStack(Blocks.MOB_SPAWNER);
 			
-			NBTTagCompound spawnerData = ((TileEntityMobSpawner)tile).getSpawnerBaseLogic().writeToNBT(new NBTTagCompound());
+			MobSpawnerBaseLogic logic = ((TileEntityMobSpawner) tile).getSpawnerBaseLogic();
+			NBTTagCompound spawnerData = logic.writeToNBT(new NBTTagCompound());
 			spawnerData.removeTag("Delay"); //Noone needs this :D
 			
 			NBTTagCompound stackTag = new NBTTagCompound();
 			stackTag.setTag(TAG_SPAWNER_DATA, spawnerData);
+			
+			if(ModConfig.SERVERSIDE_ONLY_MODE) {
+				//Cheeky way, should probably just AT this as well...
+				Entity ent = EntityList.createEntityFromNBT(spawnerData.getCompoundTag("SpawnData"), world);
+				//No way to localize this serverside, I think
+				String name = "Spawns: " + (ent == null ? "Nothing???" : ent.getName());
+				
+				NBTTagCompound display = new NBTTagCompound();
+				NBTTagList lore = new NBTTagList();
+				lore.appendTag(new NBTTagString(name));
+				display.setTag("Lore", lore);
+				stackTag.setTag("display", display);
+			}
+			
 			drop.setTagCompound(stackTag);
 			
 			Block.spawnAsEntity(world, e.getPos(), drop);
